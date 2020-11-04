@@ -145,6 +145,8 @@ class PreloadLCPImageAudit extends Audit {
       throw new Error('Could not find the LCP node');
     }
 
+    // Preload will request the resource as soon as its discovered in the main document.
+    // Reflect this change in the dependencies in our modified graph.
     modifiedLCPNode.removeAllDependencies();
     modifiedLCPNode.addDependency(mainDocumentNode);
 
@@ -157,6 +159,8 @@ class PreloadLCPImageAudit extends Audit {
     const lcpEndTimeBefore = lcpTimingsBefore && lcpTimingsBefore.endTime || 0;
     const lcpEndTimeAfter = lcpTimingsAfter && lcpTimingsAfter.endTime || 0;
 
+    // Even with preload, the image can't be painted before it's even inserted into the DOM.
+    // New LCP time will be the max of image download and image in DOM (endTime of its deps).
     let maxDependencyEndTime = 0;
     for (const nodeId of Array.from(dependenciesIds)) {
       const node = modifiedNodesById.get(nodeId);
