@@ -27,7 +27,9 @@ describe('Lighthouse Viewer', () => {
   // eslint-disable-next-line no-console
   console.log('\n✨ Be sure to have recently run this: yarn build-viewer');
 
+  /** @type {import('puppeteer').Browser} */
   let browser;
+  /** @type {import('puppeteer').Page} */
   let viewerPage;
   const pageErrors = [];
 
