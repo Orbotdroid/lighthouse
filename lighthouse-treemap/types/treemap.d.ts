@@ -1,5 +1,4 @@
-// import _Util2 = require('webtreemap-cdt'); // TODO: types.
-import _Util = require('../app/src/util.js');
+import _TreemapUtil = require('../app/src/util.js');
 import '../../types/lhr';
 import '../../types/audit-details';
 
@@ -38,7 +37,7 @@ declare global {
     sort(data: any): void;
   };
 
-  var Util: typeof _Util;
+  var TreemapUtil: typeof _TreemapUtil;
 
   interface Window {
     __treemapOptions?: Treemap.Options;

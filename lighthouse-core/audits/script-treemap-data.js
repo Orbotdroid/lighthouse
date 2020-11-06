@@ -10,11 +10,6 @@
  * Creates treemap data for treemap app.
  */
 
-const Audit = require('./audit.js');
-const JsBundles = require('../computed/js-bundles.js');
-const UnusedJavaScriptSummary = require('../computed/unused-javascript-summary.js');
-const ModuleDuplication = require('../computed/module-duplication.js');
-
 /**
  * @typedef {Treemap.RootNodeContainer[]} TreemapData
  */
@@ -22,6 +17,11 @@ const ModuleDuplication = require('../computed/module-duplication.js');
 /**
  * @typedef {Omit<Treemap.Node, 'name'|'children'>} SourceData
  */
+
+const Audit = require('./audit.js');
+const JsBundles = require('../computed/js-bundles.js');
+const UnusedJavaScriptSummary = require('../computed/unused-javascript-summary.js');
+const ModuleDuplication = require('../computed/module-duplication.js');
 
 class ScriptTreemapDataAudit extends Audit {
   /**

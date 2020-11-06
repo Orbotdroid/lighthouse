@@ -7,7 +7,7 @@
 
 /* eslint-env browser */
 
-/* globals webtreemap Util */
+/* globals webtreemap TreemapUtil */
 
 /**
  * Allows for saving the document and loading with data intact.
@@ -28,7 +28,7 @@ function injectOptions(options) {
  */
 function init(options) {
   // ==== temporary
-  Util.find('main').textContent = JSON.stringify(options.lhr);
+  TreemapUtil.find('main').textContent = JSON.stringify(options.lhr);
   // eslint-disable-next-line no-console
   console.log({webtreemap});
   // ==== temporary

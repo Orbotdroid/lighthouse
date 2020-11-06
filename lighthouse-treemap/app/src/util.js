@@ -9,7 +9,7 @@
 
 /** @typedef {HTMLElementTagNameMap & {[id: string]: HTMLElement}} HTMLElementByTagName */
 
-class Util {
+class TreemapUtil {
   /**
    * @template {string} T
    * @param {T} name
@@ -68,5 +68,5 @@ class Util {
 
 // node export for testing.
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = Util;
+  module.exports = TreemapUtil;
 }
