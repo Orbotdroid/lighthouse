@@ -52,7 +52,7 @@ class PreloadLCPImageAudit extends Audit {
     // It's not a request loaded over the network, don't recommend it.
     if (URL.NON_NETWORK_PROTOCOLS.includes(request.protocol)) return false;
     // It's already discoverable from the main document, don't recommend it.
-    if (initiatorPath.length <= mainResourceDepth + 1) return false;
+    if (initiatorPath.length <= mainResourceDepth) return false;
     // Finally, return whether or not it belongs to the main frame
     return request.frameId === mainResource.frameId;
   }
@@ -110,7 +110,6 @@ class PreloadLCPImageAudit extends Audit {
    * @return {{wastedMs: number, results: Array<{url: string, wastedMs: number}>}}
    */
   static computeWasteWithGraph(lcpNode, graph, simulator) {
-    const simulationBeforeChanges = simulator.simulate(graph, {flexibleOrdering: true});
     const modifiedGraph = graph.cloneWithRelationships();
 
     // Store the IDs of the LCP Node's dependencies for later
@@ -130,7 +129,7 @@ class PreloadLCPImageAudit extends Audit {
       const networkNode = /** @type {LH.Gatherer.Simulation.GraphNetworkNode} */ (node);
       if (node.isMainDocument()) {
         mainDocumentNode = networkNode;
-      } else if (networkNode.record.url === lcpNode.record.url) {
+      } else if (networkNode.id === lcpNode.id) {
         modifiedLCPNode = networkNode;
       }
     });
@@ -150,27 +149,29 @@ class PreloadLCPImageAudit extends Audit {
     modifiedLCPNode.removeAllDependencies();
     modifiedLCPNode.addDependency(mainDocumentNode);
 
+    const simulationBeforeChanges = simulator.simulate(graph, {flexibleOrdering: true});
     const simulationAfterChanges = simulator.simulate(modifiedGraph, {flexibleOrdering: true});
     const lcpTimingsBefore = simulationBeforeChanges.nodeTimings.get(lcpNode);
+    if (!lcpTimingsBefore) throw new Error('Impossible - node timings should never be undefined');
     const lcpTimingsAfter = simulationAfterChanges.nodeTimings.get(modifiedLCPNode);
+    if (!lcpTimingsAfter) throw new Error('Impossible - node timings should never be undefined');
     /** @type {Map<String, LH.Gatherer.Simulation.GraphNode>} */
     const modifiedNodesById = Array.from(simulationAfterChanges.nodeTimings.keys())
       .reduce((map, node) => map.set(node.id, node), new Map());
-    const lcpEndTimeBefore = lcpTimingsBefore && lcpTimingsBefore.endTime || 0;
-    const lcpEndTimeAfter = lcpTimingsAfter && lcpTimingsAfter.endTime || 0;
 
     // Even with preload, the image can't be painted before it's even inserted into the DOM.
     // New LCP time will be the max of image download and image in DOM (endTime of its deps).
     let maxDependencyEndTime = 0;
     for (const nodeId of Array.from(dependenciesIds)) {
       const node = modifiedNodesById.get(nodeId);
-      // @ts-expect-error node should never be undefined
+      if (!node) throw new Error('Impossible - node should never be undefined');
       const timings = simulationAfterChanges.nodeTimings.get(node);
       const endTime = timings && timings.endTime || 0;
       maxDependencyEndTime = Math.max(maxDependencyEndTime, endTime);
     }
 
-    const wastedMs = lcpEndTimeBefore - Math.max(lcpEndTimeAfter, maxDependencyEndTime);
+    const wastedMs = lcpTimingsBefore.endTime -
+      Math.max(lcpTimingsAfter.endTime, maxDependencyEndTime);
 
     return {
       wastedMs,
