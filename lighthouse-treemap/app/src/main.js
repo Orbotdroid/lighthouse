@@ -11,15 +11,15 @@
 
 /**
  * Allows for saving the document and loading with data intact.
+ * @param {Treemap.Options} options
  */
-function injectOptions() {
-  // @ts-expect-error
-  if (!window.__injected) return;
+function injectOptions(options) {
+  if (!window.__treemapOptionsInjected) return;
 
   const scriptEl = document.createElement('script');
-  scriptEl.innerHTML = `
-    window.__TREEMAP_OPTIONS = ${JSON.stringify(window.__TREEMAP_OPTIONS)};
-    window.__injected = true;
+  scriptEl.textContent = `
+    window.__treemapOptions = ${JSON.stringify(options)};
+    window.__treemapOptionsInjected = true;
   `;
   document.head.append(scriptEl);
 }
@@ -34,8 +34,7 @@ function init(options) {
   console.log({webtreemap});
   // ==== temporary
 
-  window.__TREEMAP_OPTIONS = options;
-  injectOptions();
+  injectOptions(options);
 
   if (window.ga) {
     // TODO what are these?
@@ -44,7 +43,7 @@ function init(options) {
   }
 
   // eslint-disable-next-line no-console
-  console.log('window.__TREEMAP_OPTIONS', window.__TREEMAP_OPTIONS);
+  console.log('window.__treemapOptions', window.__treemapOptions);
 }
 
 /**
@@ -55,8 +54,9 @@ function showError(message) {
 }
 
 async function main() {
-  if (window.__TREEMAP_OPTIONS) {
-    init(window.__TREEMAP_OPTIONS);
+  if (window.__treemapOptions) {
+    // Prefer the hardcoded options from a saved HTML file above all.
+    init(window.__treemapOptions);
   } else if (new URLSearchParams(window.location.search).has('debug')) {
     const response = await fetch('debug.json');
     init(await response.json());

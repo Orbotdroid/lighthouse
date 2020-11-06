@@ -27,7 +27,7 @@ describe('Lighthouse Treemap', () => {
   let pageErrors = [];
 
   beforeAll(async function() {
-    server.listen(portNumber, 'localhost');
+    await server.listen(portNumber, 'localhost');
     browser = await puppeteer.launch({headless: true});
     page = await browser.newPage();
     page.on('pageerror', pageError => pageErrors.push(pageError));
@@ -50,7 +50,7 @@ describe('Lighthouse Treemap', () => {
   describe('Recieves options', () => {
     it('from debug data', async () => {
       await page.goto(`${treemapUrl}?debug`, {
-        waitUntil: 'networkidle2',
+        waitUntil: 'networkidle0',
         timeout: 30000,
       });
       const options = await page.evaluate(() => window.__TREEMAP_OPTIONS);

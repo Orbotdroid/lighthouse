@@ -16,27 +16,11 @@ const UnusedJavaScriptSummary = require('../computed/unused-javascript-summary.j
 const ModuleDuplication = require('../computed/module-duplication.js');
 
 /**
- * @typedef {RootNodeContainer[]} TreemapData
+ * @typedef {Treemap.RootNodeContainer[]} TreemapData
  */
 
 /**
- * Ex: https://gist.github.com/connorjclark/0ef1099ae994c075e36d65fecb4d26a7
- * @typedef RootNodeContainer
- * @property {string} name Arbitrary name identifier. Usually a script url.
- * @property {Node} node
- */
-
-/**
- * @typedef Node
- * @property {string} name Arbitrary name identifier. Usually a path component from a source map.
- * @property {number} resourceBytes
- * @property {number=} unusedBytes
- * @property {string=} duplicatedNormalizedModuleName If present, this module is a duplicate. String is normalized source path. See ModuleDuplication.normalizeSource
- * @property {Node[]=} children
- */
-
-/**
- * @typedef {Omit<Node, 'name'|'children'>} SourceData
+ * @typedef {Omit<Treemap.Node, 'name'|'children'>} SourceData
  */
 
 class ScriptTreemapDataAudit extends Audit {
@@ -61,12 +45,12 @@ class ScriptTreemapDataAudit extends Audit {
    * same data as the sum of all descendant leaf nodes.
    * @param {string} sourceRoot
    * @param {Record<string, SourceData>} sourcesData
-   * @return {Node}
+   * @return {Treemap.Node}
    */
   static prepareTreemapNodes(sourceRoot, sourcesData) {
     /**
      * @param {string} name
-     * @return {Node}
+     * @return {Treemap.Node}
      */
     function newNode(name) {
       return {
@@ -124,7 +108,7 @@ class ScriptTreemapDataAudit extends Audit {
 
     /**
      * Collapse nodes that have only one child.
-     * @param {Node} node
+     * @param {Treemap.Node} node
      */
     function collapseAll(node) {
       while (node.children && node.children.length === 1) {
@@ -151,7 +135,7 @@ class ScriptTreemapDataAudit extends Audit {
    * @return {Promise<TreemapData>}
    */
   static async makeRootNodes(artifacts, context) {
-    /** @type {RootNodeContainer[]} */
+    /** @type {Treemap.RootNodeContainer[]} */
     const rootNodeContainers = [];
 
     let inlineScriptLength = 0;
@@ -199,7 +183,7 @@ class ScriptTreemapDataAudit extends Audit {
       const unusedJavascriptSummary = await UnusedJavaScriptSummary.request(
         {url: scriptElement.src, scriptCoverages, bundle}, context);
 
-      /** @type {Node} */
+      /** @type {Treemap.Node} */
       let node;
       if (unusedJavascriptSummary.sourcesWastedBytes && !('errorMessage' in bundle.sizes)) {
         // Create nodes for each module in a bundle.

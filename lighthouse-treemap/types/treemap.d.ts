@@ -1,7 +1,5 @@
 // import _Util2 = require('webtreemap-cdt'); // TODO: types.
 import _Util = require('../app/src/util.js');
-import {RootNodeContainer as _RootNodeContainer} from '../../lighthouse-core/audits/script-treemap-data';
-import {Node as _Node} from '../../lighthouse-core/audits/script-treemap-data';
 import '../../types/lhr';
 import '../../types/audit-details';
 
@@ -11,8 +9,21 @@ declare global {
       lhr: LH.Result;
     }
 
-    type RootNodeContainer = _RootNodeContainer;
-    type Node = _Node;
+    interface RootNodeContainer {
+      /** Arbitrary name identifier. Usually a script url. */
+      name: string;
+      node: Node;
+    }
+
+    interface Node {
+      /** Arbitrary name identifier. Usually a path component from a source map. */
+      name: string;
+      resourceBytes: number;
+      unusedBytes?: number;
+      /** If present, this module is a duplicate. String is normalized source path. See ModuleDuplication.normalizeSource */
+      duplicatedNormalizedModuleName?: string;
+      children?: Node[];
+    }
   }
 
   interface WebTreeMapOptions {
@@ -30,7 +41,8 @@ declare global {
   var Util: typeof _Util;
 
   interface Window {
-    __TREEMAP_OPTIONS?: Treemap.Options;
+    __treemapOptions?: Treemap.Options;
+    __treemapOptionsInjected?: boolean;
   }
 }
 

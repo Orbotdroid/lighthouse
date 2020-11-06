@@ -58,8 +58,8 @@ describe('Lighthouse Viewer', () => {
       });
   }
 
-  beforeAll(async function() {
-    server.listen(portNumber, 'localhost');
+  beforeAll(async () => {
+    await server.listen(portNumber, 'localhost');
 
     // start puppeteer
     browser = await puppeteer.launch({
