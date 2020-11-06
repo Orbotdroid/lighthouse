@@ -42,7 +42,6 @@ declare global {
 
   interface Window {
     __treemapOptions?: Treemap.Options;
-    __treemapOptionsInjected?: boolean;
   }
 }
 

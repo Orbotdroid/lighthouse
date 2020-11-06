@@ -14,12 +14,11 @@
  * @param {Treemap.Options} options
  */
 function injectOptions(options) {
-  if (!window.__treemapOptionsInjected) return;
+  if (window.__treemapOptions) return;
 
   const scriptEl = document.createElement('script');
   scriptEl.textContent = `
     window.__treemapOptions = ${JSON.stringify(options)};
-    window.__treemapOptionsInjected = true;
   `;
   document.head.append(scriptEl);
 }

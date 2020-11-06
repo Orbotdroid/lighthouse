@@ -28,9 +28,6 @@ describe('Lighthouse Treemap', () => {
 
   beforeAll(async function() {
     await server.listen(portNumber, 'localhost');
-    browser = await puppeteer.launch({headless: true});
-    page = await browser.newPage();
-    page.on('pageerror', pageError => pageErrors.push(pageError));
   });
 
   afterAll(async function() {
@@ -40,7 +37,15 @@ describe('Lighthouse Treemap', () => {
     ]);
   });
 
-  afterEach(() => {
+  beforeEach(async () => {
+    if (!browser) browser = await puppeteer.launch({headless: true});
+    page = await browser.newPage();
+    page.on('pageerror', pageError => pageErrors.push(pageError));
+  });
+
+  afterEach(async () => {
+    await page.close();
+
     // Fails if any unexpected errors ocurred.
     // If a test expects an error, it will clear this array.
     expect(pageErrors).toMatchObject([]);
@@ -53,7 +58,7 @@ describe('Lighthouse Treemap', () => {
         waitUntil: 'networkidle0',
         timeout: 30000,
       });
-      const options = await page.evaluate(() => window.__TREEMAP_OPTIONS);
+      const options = await page.evaluate(() => window.__treemapOptions);
       expect(options.lhr.requestedUrl).toBe(debugOptions.lhr.requestedUrl);
     });
 
@@ -70,18 +75,18 @@ describe('Lighthouse Treemap', () => {
       page = await target.page();
       await openerPage.close();
       await page.waitForFunction(
-        () => window.__TREEMAP_OPTIONS || document.body.textContent.startsWith('Error'));
+        () => window.__treemapOptions || document.body.textContent.startsWith('Error'));
     }
 
     it('from window postMessage', async () => {
       await loadFromPostMessage(debugOptions);
-      const options = await page.evaluate(() => window.__TREEMAP_OPTIONS);
+      const options = await page.evaluate(() => window.__treemapOptions);
       expect(options.lhr.requestedUrl).toBe(debugOptions.lhr.requestedUrl);
     });
 
     it('handles errors', async () => {
       await loadFromPostMessage({});
-      const options = await page.evaluate(() => window.__TREEMAP_OPTIONS);
+      const options = await page.evaluate(() => window.__treemapOptions);
       expect(options).toBeUndefined();
       const error = await page.evaluate(() => document.body.textContent);
       expect(error).toBe('Error: Invalid options');
